@@ -376,11 +376,6 @@ ${mjHead}
         </mj-text>
       </mj-column>
     </mj-section>
-    <mj-section padding="16px 24px 0">
-      <mj-column>
-        <mj-text font-size="13px" color="${colors.muted}">Still don't see the refund after that window? Reply to this email with your bank's name and the last 4 digits of the card and we'll trace it for you.</mj-text>
-      </mj-column>
-    </mj-section>
     ${orderNumberBadge}
     ${sectionDivider}
     ${orderLinesWithImages}
