@@ -21,6 +21,12 @@ const OrderFulfilledWebhookPayload = gql`
   fragment OrderFulfilledWebhookPayload on OrderFulfilled {
     order {
       ...OrderDetails
+      fulfillments {
+        id
+        status
+        trackingNumber
+        fulfillmentOrder
+      }
     }
   }
 `;
