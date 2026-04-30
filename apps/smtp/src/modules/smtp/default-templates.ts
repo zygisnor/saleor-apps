@@ -1,22 +1,28 @@
 import { type MessageEventTypes } from "../event-handlers/message-event-types";
 
-// —— Design System ——
+// ---- Design system ----
+// Industrial automotive palette: deep blue + amber accent.
+// Slate neutrals carried over for body text + dividers.
 const colors = {
-  primary: "#0f172a", // Slate 900 – headings, buttons
-  text: "#334155", // Slate 700 – body text
-  muted: "#64748b", // Slate 500 – secondary text
-  border: "#e2e8f0", // Slate 200 – dividers
-  background: "#f8fafc", // Slate 50 – page background
-  surface: "#ffffff", // White – card background
-  accent: "#f1f5f9", // Slate 100 – subtle highlights
+  primary: "#0b3a6f", // Deep trade blue — headings, primary buttons
+  accent: "#ea580c", // Amber — accent strip + secondary highlights
+  text: "#1f2937", // Slate 800 — body text
+  muted: "#64748b", // Slate 500 — secondary text
+  border: "#e2e8f0", // Slate 200 — dividers
+  background: "#f5f7fa", // Cool grey — page background
+  surface: "#ffffff", // White — card background
+  panel: "#f1f5f9", // Slate 100 — info chips, gift card panel
+  danger: "#b91c1c", // Red 700 — destructive button (account delete only)
 };
 
-// —— Shared MJML head ——
+const SUPPORT_EMAIL = "info@wwspares.com";
+
+// ---- Shared MJML head ----
 const mjHead = `<mj-head>
   <mj-attributes>
     <mj-all font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" />
     <mj-body background-color="${colors.background}" />
-    <mj-wrapper padding="24px 16px" background-color="${colors.surface}" border-radius="8px" />
+    <mj-wrapper padding="0" background-color="${colors.surface}" border-radius="10px" />
     <mj-section padding="0" />
     <mj-column padding="0" />
     <mj-text padding="0" font-size="16px" line-height="1.6" color="${colors.text}" />
@@ -24,92 +30,123 @@ const mjHead = `<mj-head>
   </mj-attributes>
   <mj-breakpoint width="480px" />
   <mj-style>
-    .product-row td { padding: 16px 0; border-bottom: 1px solid ${colors.border}; }
+    .product-row td { padding: 16px 0; border-bottom: 1px solid ${colors.border}; vertical-align: top; }
     .product-row:last-child td { border-bottom: none; }
     .totals-row td { padding: 8px 0; }
     .totals-row.total td { padding-top: 12px; border-top: 1px solid ${colors.border}; font-weight: 600; }
+    .sku-chip { display: inline-block; font-family: 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12px; color: ${colors.muted}; background: ${colors.panel}; padding: 2px 8px; border-radius: 4px; margin-top: 4px; }
+    .accent-bar { height: 4px; background: ${colors.accent}; border-radius: 10px 10px 0 0; }
     @media only screen and (max-width: 480px) {
       .billing-column { padding-top: 24px !important; }
     }
   </mj-style>
 </mj-head>`;
 
-// —— Header with optional logo (for Notify events: account emails) ——
-const headerSection = `<mj-section padding="0 0 24px">
+// ---- Top accent bar (brand signature) ----
+const accentBar = `<mj-section padding="0" background-color="${colors.surface}">
+  <mj-column>
+    <mj-raw><div class="accent-bar" style="height:4px;background:${colors.accent};border-radius:10px 10px 0 0;line-height:4px;font-size:0;">&nbsp;</div></mj-raw>
+  </mj-column>
+</mj-section>`;
+
+// ---- Header for Notify-payload templates (snake_case: site_name / logo_url) ----
+const headerSection = `<mj-section padding="24px 24px 16px">
   <mj-column>
     {{#if logo_url}}
-    <mj-image src="{{logo_url}}" alt="{{site_name}}" width="96px" align="left" padding="0 0 16px" />
+    <mj-image src="{{logo_url}}" alt="{{site_name}}" width="120px" align="left" padding="0" />
     {{else}}
-    {{#if site_name}}
-    <mj-text font-size="20px" font-weight="700" color="${colors.primary}" padding="0 0 16px">{{site_name}}</mj-text>
-    {{/if}}
+    <mj-text font-size="22px" font-weight="700" color="${colors.primary}" padding="0">
+      {{#if site_name}}{{site_name}}{{else}}WWSpares{{/if}}
+    </mj-text>
     {{/if}}
   </mj-column>
 </mj-section>`;
 
-// —— Header for Order webhooks (uses branding from app config) ——
-const orderHeaderSection = `<mj-section padding="0 0 24px">
+// ---- Header for Order-webhook templates (uses branding from app config) ----
+const orderHeaderSection = `<mj-section padding="24px 24px 16px">
   <mj-column>
     {{#if branding.logoUrl}}
-    <mj-image src="{{branding.logoUrl}}" alt="{{branding.siteName}}" width="96px" align="left" padding="0 0 16px" />
+    <mj-image src="{{branding.logoUrl}}" alt="{{branding.siteName}}" width="120px" align="left" padding="0" />
     {{else}}
-    {{#if branding.siteName}}
-    <mj-text font-size="20px" font-weight="700" color="${colors.primary}" padding="0 0 16px">{{branding.siteName}}</mj-text>
-    {{else}}
-    {{#if order.channel.name}}
-    <mj-text font-size="20px" font-weight="700" color="${colors.primary}" padding="0 0 16px">{{order.channel.name}}</mj-text>
-    {{/if}}
-    {{/if}}
+    <mj-text font-size="22px" font-weight="700" color="${colors.primary}" padding="0">
+      {{#if branding.siteName}}{{branding.siteName}}{{else}}{{#if order.channel.name}}{{order.channel.name}}{{else}}WWSpares{{/if}}{{/if}}
+    </mj-text>
     {{/if}}
   </mj-column>
 </mj-section>`;
 
-// —— Footer with support info (for Notify events) ——
-const footerSection = `<mj-section padding="24px 0 0">
+// ---- Trust strip (only for transactional order emails) ----
+const trustStrip = `<mj-section padding="0 24px 16px">
   <mj-column>
-    <mj-divider border-color="${colors.border}" border-width="1px" padding="0 0 24px" />
-    <mj-text font-size="14px" color="${colors.muted}" align="center">
-      Questions? Reply to this email or contact our support team.
-    </mj-text>
-    {{#if site_name}}
-    <mj-text font-size="14px" color="${colors.muted}" align="center" padding-top="8px">
-      &copy; {{site_name}}
-    </mj-text>
-    {{/if}}
-    <mj-text font-size="12px" color="${colors.muted}" align="center" padding-top="12px" font-style="italic">
-      Powered by Saleor Commerce
+    <mj-text font-size="12px" font-weight="600" color="${colors.muted}" letter-spacing="1px" align="left" padding="0">
+      12-MONTH WARRANTY &nbsp;·&nbsp; EU-WIDE SHIPPING &nbsp;·&nbsp; GENUINE OEM
     </mj-text>
   </mj-column>
 </mj-section>`;
 
-// —— Footer for Order webhooks (uses branding from app config) ——
-const orderFooterSection = `<mj-section padding="24px 0 0">
+// ---- Footer for Order-webhook templates ----
+const orderFooterSection = `<mj-section padding="24px 24px 0">
   <mj-column>
-    <mj-divider border-color="${colors.border}" border-width="1px" padding="0 0 24px" />
-    <mj-text font-size="14px" color="${colors.muted}" align="center">
-      Questions? Reply to this email or contact our support team.
+    <mj-divider border-color="${colors.border}" border-width="1px" padding="0 0 20px" />
+    <mj-text font-size="14px" color="${colors.text}" align="center" padding="0 0 8px">
+      <strong>Need help with this order?</strong>
+    </mj-text>
+    <mj-text font-size="14px" color="${colors.muted}" align="center" padding="0 0 4px">
+      Reply to this email or write to <a href="mailto:${SUPPORT_EMAIL}" style="color:${colors.primary};text-decoration:none;"><strong>${SUPPORT_EMAIL}</strong></a>.
+    </mj-text>
+    <mj-text font-size="13px" color="${colors.muted}" align="center" padding="0 0 16px">
+      Quote your order number when contacting us — we'll get back to you within one business day.
+    </mj-text>
+  </mj-column>
+</mj-section>
+<mj-section padding="0 24px 24px">
+  <mj-column>
+    <mj-text font-size="12px" color="${colors.muted}" align="center" padding="0">
+      WWSpares &mdash; used genuine OEM auto parts &mdash; VW, Audi, BMW, Mercedes, Porsche &amp; more
     </mj-text>
     {{#if branding.siteName}}
-    <mj-text font-size="14px" color="${colors.muted}" align="center" padding-top="8px">
+    <mj-text font-size="12px" color="${colors.muted}" align="center" padding-top="4px">
       &copy; {{branding.siteName}}
     </mj-text>
     {{else}}
     {{#if order.channel.name}}
-    <mj-text font-size="14px" color="${colors.muted}" align="center" padding-top="8px">
+    <mj-text font-size="12px" color="${colors.muted}" align="center" padding-top="4px">
       &copy; {{order.channel.name}}
     </mj-text>
     {{/if}}
     {{/if}}
-    <mj-text font-size="12px" color="${colors.muted}" align="center" padding-top="12px" font-style="italic">
-      Powered by Saleor Commerce
-    </mj-text>
   </mj-column>
 </mj-section>`;
 
-// —— Order lines with product thumbnails ——
-const orderLinesWithImages = `<mj-section padding="0">
+// ---- Footer for Notify-payload templates (account / fulfillment-update) ----
+const footerSection = `<mj-section padding="24px 24px 0">
   <mj-column>
-    <mj-text font-size="12px" font-weight="600" color="${colors.muted}" letter-spacing="1px" padding="0 0 12px">ORDER SUMMARY</mj-text>
+    <mj-divider border-color="${colors.border}" border-width="1px" padding="0 0 20px" />
+    <mj-text font-size="14px" color="${colors.text}" align="center" padding="0 0 8px">
+      <strong>Questions?</strong>
+    </mj-text>
+    <mj-text font-size="14px" color="${colors.muted}" align="center" padding="0 0 16px">
+      Write to <a href="mailto:${SUPPORT_EMAIL}" style="color:${colors.primary};text-decoration:none;"><strong>${SUPPORT_EMAIL}</strong></a> &mdash; we'll respond within one business day.
+    </mj-text>
+  </mj-column>
+</mj-section>
+<mj-section padding="0 24px 24px">
+  <mj-column>
+    <mj-text font-size="12px" color="${colors.muted}" align="center" padding="0">
+      WWSpares &mdash; used genuine OEM auto parts
+    </mj-text>
+    {{#if site_name}}
+    <mj-text font-size="12px" color="${colors.muted}" align="center" padding-top="4px">
+      &copy; {{site_name}}
+    </mj-text>
+    {{/if}}
+  </mj-column>
+</mj-section>`;
+
+// ---- Order lines with thumbnail + SKU chip ----
+const orderLinesWithImages = `<mj-section padding="0 24px">
+  <mj-column>
+    <mj-text font-size="12px" font-weight="600" color="${colors.muted}" letter-spacing="1px" padding="0 0 12px">ITEMS IN THIS ORDER</mj-text>
     <mj-table padding="0" cellpadding="0" cellspacing="0">
       {{#each order.lines}}
       <tr class="product-row">
@@ -117,13 +154,14 @@ const orderLinesWithImages = `<mj-section padding="0">
           {{#if this.thumbnail.url}}
           <img src="{{this.thumbnail.url}}" alt="{{this.productName}}" width="64" height="64" style="border-radius: 6px; object-fit: cover;" />
           {{else}}
-          <div style="width: 64px; height: 64px; background: ${colors.accent}; border-radius: 6px;"></div>
+          <div style="width: 64px; height: 64px; background: ${colors.panel}; border-radius: 6px;"></div>
           {{/if}}
         </td>
         <td style="vertical-align: top; max-width: 280px;">
           <div style="font-weight: 600; color: ${colors.primary}; margin-bottom: 4px;">{{this.productName}}</div>
           {{#if this.variantName}}<div style="font-size: 14px; color: ${colors.muted};">{{this.variantName}}</div>{{/if}}
           <div style="font-size: 14px; color: ${colors.muted};">Qty: {{this.quantity}}</div>
+          {{#if this.productSku}}<div class="sku-chip">SKU: {{this.productSku}}</div>{{/if}}
         </td>
         <td style="width: 24px;"></td>
         <td style="text-align: right; vertical-align: top; white-space: nowrap;">
@@ -135,8 +173,8 @@ const orderLinesWithImages = `<mj-section padding="0">
   </mj-column>
 </mj-section>`;
 
-// —— Order totals ——
-const orderTotals = `<mj-section padding="16px 0 0">
+// ---- Order totals ----
+const orderTotals = `<mj-section padding="16px 24px 0">
   <mj-column>
     <mj-table padding="0" cellpadding="0" cellspacing="0" font-size="14px" color="${colors.text}">
       <tr class="totals-row">
@@ -161,8 +199,8 @@ const orderTotals = `<mj-section padding="16px 0 0">
   </mj-column>
 </mj-section>`;
 
-// —— Address blocks (side by side on desktop, stacked on mobile) ——
-const addressBlocksBothColumns = `<mj-section padding="24px 0 0">
+// ---- Address blocks side by side (used on order-created/confirmed/fully-paid) ----
+const addressBlocksBothColumns = `<mj-section padding="24px 24px 0">
   <mj-column>
     <mj-text font-size="12px" font-weight="600" color="${colors.muted}" letter-spacing="1px" padding="0 0 8px">SHIPPING TO</mj-text>
     {{#if order.shippingAddress}}
@@ -193,8 +231,8 @@ const addressBlocksBothColumns = `<mj-section padding="24px 0 0">
   </mj-column>
 </mj-section>`;
 
-// —— Shipping address only (for fulfillment emails) ——
-const shippingAddressBlock = `<mj-section padding="24px 0 0">
+// ---- Shipping address only (camelCase, for ORDER_FULFILLED) ----
+const shippingAddressBlock = `<mj-section padding="24px 24px 0">
   <mj-column>
     <mj-text font-size="12px" font-weight="600" color="${colors.muted}" letter-spacing="1px" padding="0 0 8px">SHIPPING TO</mj-text>
     {{#if order.shippingAddress}}
@@ -211,8 +249,8 @@ const shippingAddressBlock = `<mj-section padding="24px 0 0">
   </mj-column>
 </mj-section>`;
 
-// —— Notify payload address block (snake_case) ——
-const shippingAddressBlockNotify = `<mj-section padding="24px 0 0">
+// ---- Shipping address (snake_case Notify payload, for ORDER_FULFILLMENT_UPDATE) ----
+const shippingAddressBlockNotify = `<mj-section padding="24px 24px 0">
   <mj-column>
     <mj-text font-size="12px" font-weight="600" color="${colors.muted}" letter-spacing="1px" padding="0 0 8px">SHIPPING TO</mj-text>
     {{#if order.shipping_address}}
@@ -228,12 +266,14 @@ const shippingAddressBlockNotify = `<mj-section padding="24px 0 0">
   </mj-column>
 </mj-section>`;
 
-// —— Order number badge ——
-const orderNumberBadge = `<mj-section padding="24px 0 0">
+// ---- Order number badge ----
+const orderNumberBadge = `<mj-section padding="20px 24px 0">
   <mj-column>
     <mj-text font-size="12px" font-weight="600" color="${colors.muted}" letter-spacing="1px" padding="0">ORDER #{{order.number}}</mj-text>
   </mj-column>
 </mj-section>`;
+
+const sectionDivider = `<mj-section padding="16px 24px"><mj-column><mj-divider border-color="${colors.border}" border-width="1px" padding="0" /></mj-column></mj-section>`;
 
 /*
  * ============================================================
@@ -245,16 +285,18 @@ const defaultOrderCreatedMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${orderHeaderSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Thank you for your order!</mj-text>
-        <mj-text padding="0 0 8px">We've received your order and will begin processing it shortly.</mj-text>
-        <mj-text padding="0" color="${colors.muted}">You'll receive another email when your order ships.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Order received</mj-text>
+        <mj-text padding="0 0 8px">Thanks for ordering with WWSpares. We've logged your order and our team is checking stock now.</mj-text>
+        <mj-text padding="0" color="${colors.muted}">You'll get a confirmation email as soon as the parts are reserved and ready to ship.</mj-text>
       </mj-column>
     </mj-section>
+    ${trustStrip}
     ${orderNumberBadge}
-    <mj-section padding="16px 0"><mj-column><mj-divider border-color="${colors.border}" border-width="1px" padding="0" /></mj-column></mj-section>
+    ${sectionDivider}
     ${orderLinesWithImages}
     ${orderTotals}
     ${addressBlocksBothColumns}
@@ -267,16 +309,18 @@ const defaultOrderConfirmedMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${orderHeaderSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Your order is confirmed!</mj-text>
-        <mj-text padding="0 0 8px">Great news – we've confirmed your order and it's being prepared.</mj-text>
-        <mj-text padding="0" color="${colors.muted}">We'll notify you when it's on its way.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Order confirmed</mj-text>
+        <mj-text padding="0 0 8px">Your parts are reserved and we're packing your order now.</mj-text>
+        <mj-text padding="0" color="${colors.muted}">We'll send a tracking link as soon as the carrier picks it up.</mj-text>
       </mj-column>
     </mj-section>
+    ${trustStrip}
     ${orderNumberBadge}
-    <mj-section padding="16px 0"><mj-column><mj-divider border-color="${colors.border}" border-width="1px" padding="0" /></mj-column></mj-section>
+    ${sectionDivider}
     ${orderLinesWithImages}
     ${orderTotals}
     ${addressBlocksBothColumns}
@@ -289,11 +333,12 @@ const defaultOrderFulfilledMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${orderHeaderSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Your order is on its way!</mj-text>
-        <mj-text padding="0 0 8px">We've shipped your order and it's headed your way.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Your parts are on the way</mj-text>
+        <mj-text padding="0 0 8px">Your order has shipped and is heading to the address below.</mj-text>
         {{#if order.shippingMethodName}}
         <mj-text padding="0" color="${colors.muted}">Shipped via {{order.shippingMethodName}}</mj-text>
         {{/if}}
@@ -308,7 +353,7 @@ ${mjHead}
     </mj-section>
     {{#with (lookup order.fulfillments 0)}}
       {{#if (carrierTrackingUrl trackingNumber)}}
-      <mj-section padding="16px 0 0">
+      <mj-section padding="16px 24px 0">
         <mj-column>
           <mj-button href="{{carrierTrackingUrl trackingNumber}}">Track with {{carrierName trackingNumber}}</mj-button>
         </mj-column>
@@ -317,15 +362,16 @@ ${mjHead}
     {{/with}}
     {{#unless (lookup (lookup order.fulfillments 0) "trackingNumber")}}
       {{#if order.redirectUrl}}
-      <mj-section padding="16px 0 0">
+      <mj-section padding="16px 24px 0">
         <mj-column>
           <mj-button href="{{order.redirectUrl}}">View your order</mj-button>
         </mj-column>
       </mj-section>
       {{/if}}
     {{/unless}}
+    ${trustStrip}
     ${orderNumberBadge}
-    <mj-section padding="16px 0"><mj-column><mj-divider border-color="${colors.border}" border-width="1px" padding="0" /></mj-column></mj-section>
+    ${sectionDivider}
     ${orderLinesWithImages}
     ${orderTotals}
     ${shippingAddressBlock}
@@ -338,16 +384,18 @@ const defaultOrderFullyPaidMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${orderHeaderSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Payment received!</mj-text>
-        <mj-text padding="0 0 8px">We've received your payment in full. Thank you!</mj-text>
-        <mj-text padding="0" color="${colors.muted}">Your order will be processed and shipped soon.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Payment received</mj-text>
+        <mj-text padding="0 0 8px">Thanks &mdash; your payment has cleared. We're packing your parts now.</mj-text>
+        <mj-text padding="0" color="${colors.muted}">A tracking link follows as soon as the carrier picks the parcel up.</mj-text>
       </mj-column>
     </mj-section>
+    ${trustStrip}
     ${orderNumberBadge}
-    <mj-section padding="16px 0"><mj-column><mj-divider border-color="${colors.border}" border-width="1px" padding="0" /></mj-column></mj-section>
+    ${sectionDivider}
     ${orderLinesWithImages}
     ${orderTotals}
     ${addressBlocksBothColumns}
@@ -360,16 +408,17 @@ const defaultOrderCancelledMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${orderHeaderSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Order cancelled</mj-text>
-        <mj-text padding="0 0 8px">Your order has been cancelled as requested.</mj-text>
-        <mj-text padding="0" color="${colors.muted}">If you have any questions or didn't request this cancellation, please contact us.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Order cancelled</mj-text>
+        <mj-text padding="0 0 8px">This order has been cancelled. If a payment had been taken, the refund is on its way back to your card.</mj-text>
+        <mj-text padding="0" color="${colors.muted}">Didn't request this? Reply to this email and we'll sort it out straight away.</mj-text>
       </mj-column>
     </mj-section>
     ${orderNumberBadge}
-    <mj-section padding="16px 0"><mj-column><mj-divider border-color="${colors.border}" border-width="1px" padding="0" /></mj-column></mj-section>
+    ${sectionDivider}
     ${orderLinesWithImages}
     ${orderTotals}
     ${orderFooterSection}
@@ -381,16 +430,17 @@ const defaultOrderRefundedMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${orderHeaderSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Refund processed</mj-text>
-        <mj-text padding="0 0 8px">We've processed a refund for your order.</mj-text>
-        <mj-text padding="0" color="${colors.muted}">The refund should appear in your account within 5-10 business days, depending on your payment method.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Refund processed</mj-text>
+        <mj-text padding="0 0 8px">Your refund has been processed and the funds are returning to your original payment method.</mj-text>
+        <mj-text padding="0" color="${colors.muted}">Most cards show the refund within 5&ndash;10 business days. SEPA / bank transfers can take a little longer.</mj-text>
       </mj-column>
     </mj-section>
     ${orderNumberBadge}
-    <mj-section padding="16px 0"><mj-column><mj-divider border-color="${colors.border}" border-width="1px" padding="0" /></mj-column></mj-section>
+    ${sectionDivider}
     ${orderLinesWithImages}
     ${orderTotals}
     ${orderFooterSection}
@@ -402,20 +452,21 @@ const defaultOrderFulfillmentUpdatedMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${headerSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Shipping update</mj-text>
-        <mj-text padding="0 0 8px">There's an update on your shipment for order #{{order.number}}.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Shipping update</mj-text>
+        <mj-text padding="0 0 8px">There's an update on the shipment for order #{{order.number}}.</mj-text>
         {{#if fulfillment.tracking_number}}
-        <mj-text padding="8px 0 0">
+        <mj-text padding="8px 0 0" color="${colors.text}">
           <strong>Tracking number:</strong> {{fulfillment.tracking_number}}{{#if (carrierName fulfillment.tracking_number)}} ({{carrierName fulfillment.tracking_number}}){{/if}}
         </mj-text>
         {{/if}}
       </mj-column>
     </mj-section>
     {{#if (carrierTrackingUrl fulfillment.tracking_number)}}
-    <mj-section padding="16px 0 0">
+    <mj-section padding="16px 24px 0">
       <mj-column>
         <mj-button href="{{carrierTrackingUrl fulfillment.tracking_number}}">Track with {{carrierName fulfillment.tracking_number}}</mj-button>
       </mj-column>
@@ -437,18 +488,19 @@ const defaultInvoiceSentMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${orderHeaderSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Your invoice is ready</mj-text>
-        <mj-text padding="0 0 8px">A new invoice has been created for your order{{#if order}} #{{order.number}}{{/if}}.</mj-text>
-        <mj-text padding="0" color="${colors.muted}">Click below to download your invoice.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Your invoice is ready</mj-text>
+        <mj-text padding="0 0 8px">A new invoice has been issued for your order{{#if order}} #{{order.number}}{{/if}}.</mj-text>
+        <mj-text padding="0" color="${colors.muted}">Tap below to download a PDF copy. Keep it for your records or VAT reclaim.</mj-text>
       </mj-column>
     </mj-section>
     {{#if invoice.url}}
-    <mj-section padding="24px 0 0">
+    <mj-section padding="20px 24px 0">
       <mj-column>
-        <mj-button href="{{invoice.url}}">Download invoice</mj-button>
+        <mj-button href="{{invoice.url}}">Download invoice (PDF)</mj-button>
       </mj-column>
     </mj-section>
     {{/if}}
@@ -467,16 +519,17 @@ const defaultGiftCardSentMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${headerSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">You've received a gift card!</mj-text>
-        <mj-text padding="0">Someone special sent you a gift card. Use the code below at checkout to redeem it.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">You've received a gift card</mj-text>
+        <mj-text padding="0">Use the code below at checkout to apply your credit toward any part on WWSpares.</mj-text>
       </mj-column>
     </mj-section>
     {{#if giftCard}}
-    <mj-section padding="24px 0 0">
-      <mj-column background-color="${colors.accent}" border-radius="8px" padding="24px">
+    <mj-section padding="20px 24px 0">
+      <mj-column background-color="${colors.panel}" border-radius="8px" padding="24px">
         <mj-text font-size="12px" font-weight="600" color="${colors.muted}" letter-spacing="1px" padding="0 0 8px">YOUR GIFT CARD CODE</mj-text>
         <mj-text font-size="28px" font-weight="700" color="${colors.primary}" letter-spacing="2px" padding="0 0 16px">{{giftCard.displayCode}}</mj-text>
         {{#if giftCard.currentBalance}}
@@ -498,7 +551,7 @@ ${mjHead}
 
 /*
  * ============================================================
- * ACCOUNT TEMPLATES
+ * ACCOUNT TEMPLATES (Notify payload — snake_case)
  * ============================================================
  */
 
@@ -506,22 +559,23 @@ const defaultAccountConfirmationMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${headerSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Activate your account</mj-text>
-        <mj-text padding="0 0 8px">Hi{{#if user.first_name}} {{user.first_name}}{{/if}}! Thanks for signing up.</mj-text>
-        <mj-text padding="0">Click the button below to activate your account and get started.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Activate your WWSpares account</mj-text>
+        <mj-text padding="0 0 8px">Hi{{#if user.first_name}} {{user.first_name}}{{/if}} &mdash; thanks for signing up.</mj-text>
+        <mj-text padding="0">Click the button below to activate your account. The link is single-use and expires soon.</mj-text>
       </mj-column>
     </mj-section>
-    <mj-section padding="24px 0 0">
+    <mj-section padding="20px 24px 0">
       <mj-column>
         <mj-button href="{{confirm_url}}">Activate account</mj-button>
       </mj-column>
     </mj-section>
-    <mj-section padding="16px 0 0">
+    <mj-section padding="12px 24px 0">
       <mj-column>
-        <mj-text font-size="14px" color="${colors.muted}">If you didn't create an account, you can safely ignore this email.</mj-text>
+        <mj-text font-size="13px" color="${colors.muted}">Didn't sign up? You can safely ignore this email &mdash; nothing was created.</mj-text>
       </mj-column>
     </mj-section>
     ${footerSection}
@@ -533,22 +587,23 @@ const defaultAccountPasswordResetMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${headerSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Reset your password</mj-text>
-        <mj-text padding="0 0 8px">Hi{{#if user.first_name}} {{user.first_name}}{{/if}}! We received a request to reset your password.</mj-text>
-        <mj-text padding="0">Click the button below to create a new password.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Reset your password</mj-text>
+        <mj-text padding="0 0 8px">Hi{{#if user.first_name}} {{user.first_name}}{{/if}} &mdash; we got a request to reset your WWSpares password.</mj-text>
+        <mj-text padding="0">Set a new one with the button below. The link is single-use and expires soon.</mj-text>
       </mj-column>
     </mj-section>
-    <mj-section padding="24px 0 0">
+    <mj-section padding="20px 24px 0">
       <mj-column>
-        <mj-button href="{{reset_url}}">Reset password</mj-button>
+        <mj-button href="{{reset_url}}">Set a new password</mj-button>
       </mj-column>
     </mj-section>
-    <mj-section padding="16px 0 0">
+    <mj-section padding="12px 24px 0">
       <mj-column>
-        <mj-text font-size="14px" color="${colors.muted}">If you didn't request a password reset, you can safely ignore this email. Your password won't be changed.</mj-text>
+        <mj-text font-size="13px" color="${colors.muted}">Didn't request this? Ignore this email &mdash; your current password stays in place.</mj-text>
       </mj-column>
     </mj-section>
     ${footerSection}
@@ -560,22 +615,23 @@ const defaultAccountChangeEmailRequestMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${headerSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Confirm your new email</mj-text>
-        <mj-text padding="0 0 8px">Hi{{#if user.first_name}} {{user.first_name}}{{/if}}! You requested to change your email address to <strong>{{new_email}}</strong>.</mj-text>
-        <mj-text padding="0">Click the button below to confirm this change.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Confirm your new email address</mj-text>
+        <mj-text padding="0 0 8px">Hi{{#if user.first_name}} {{user.first_name}}{{/if}} &mdash; you requested to change your sign-in email to <strong>{{new_email}}</strong>.</mj-text>
+        <mj-text padding="0">Confirm the change with the button below.</mj-text>
       </mj-column>
     </mj-section>
-    <mj-section padding="24px 0 0">
+    <mj-section padding="20px 24px 0">
       <mj-column>
-        <mj-button href="{{redirect_url}}">Confirm email change</mj-button>
+        <mj-button href="{{redirect_url}}">Confirm new email</mj-button>
       </mj-column>
     </mj-section>
-    <mj-section padding="16px 0 0">
+    <mj-section padding="12px 24px 0">
       <mj-column>
-        <mj-text font-size="14px" color="${colors.muted}">If you didn't request this change, please ignore this email or contact support.</mj-text>
+        <mj-text font-size="13px" color="${colors.muted}">If this wasn't you, ignore this email or contact <a href="mailto:${SUPPORT_EMAIL}" style="color:${colors.primary};">${SUPPORT_EMAIL}</a>.</mj-text>
       </mj-column>
     </mj-section>
     ${footerSection}
@@ -587,19 +643,20 @@ const defaultAccountChangeEmailConfirmationMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${headerSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Email updated</mj-text>
-        <mj-text padding="0 0 8px">Hi{{#if user.first_name}} {{user.first_name}}{{/if}}! Your email address has been successfully updated.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Email address updated</mj-text>
+        <mj-text padding="0 0 8px">Hi{{#if user.first_name}} {{user.first_name}}{{/if}} &mdash; your sign-in email has been updated.</mj-text>
         {{#if new_email}}
         <mj-text padding="0">Your new email is <strong>{{new_email}}</strong>.</mj-text>
         {{/if}}
       </mj-column>
     </mj-section>
-    <mj-section padding="16px 0 0">
+    <mj-section padding="12px 24px 0">
       <mj-column>
-        <mj-text font-size="14px" color="${colors.muted}">If you didn't make this change, please contact support immediately.</mj-text>
+        <mj-text font-size="13px" color="${colors.muted}">If you didn't make this change, contact <a href="mailto:${SUPPORT_EMAIL}" style="color:${colors.primary};">${SUPPORT_EMAIL}</a> immediately.</mj-text>
       </mj-column>
     </mj-section>
     ${footerSection}
@@ -611,22 +668,23 @@ const defaultAccountDeleteMjmlTemplate = `<mjml>
 ${mjHead}
 <mj-body>
   <mj-wrapper>
+    ${accentBar}
     ${headerSection}
-    <mj-section>
+    <mj-section padding="0 24px 8px">
       <mj-column>
-        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 16px">Delete your account</mj-text>
-        <mj-text padding="0 0 8px">Hi{{#if user.first_name}} {{user.first_name}}{{/if}}, we received a request to delete your account.</mj-text>
-        <mj-text padding="0">If you want to proceed, click the button below. This action cannot be undone.</mj-text>
+        <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Confirm account deletion</mj-text>
+        <mj-text padding="0 0 8px">Hi{{#if user.first_name}} {{user.first_name}}{{/if}} &mdash; we got a request to delete your WWSpares account.</mj-text>
+        <mj-text padding="0">Click below to confirm. <strong>This cannot be undone.</strong></mj-text>
       </mj-column>
     </mj-section>
-    <mj-section padding="24px 0 0">
+    <mj-section padding="20px 24px 0">
       <mj-column>
-        <mj-button href="{{delete_url}}" background-color="#dc2626">Delete my account</mj-button>
+        <mj-button href="{{delete_url}}" background-color="${colors.danger}">Delete my account</mj-button>
       </mj-column>
     </mj-section>
-    <mj-section padding="16px 0 0">
+    <mj-section padding="12px 24px 0">
       <mj-column>
-        <mj-text font-size="14px" color="${colors.muted}">If you didn't request this, you can safely ignore this email. Your account will remain active.</mj-text>
+        <mj-text font-size="13px" color="${colors.muted}">Didn't request this? Ignore this email &mdash; your account stays active.</mj-text>
       </mj-column>
     </mj-section>
     ${footerSection}
@@ -658,18 +716,18 @@ export const defaultMjmlTemplates: Record<MessageEventTypes, string> = {
 };
 
 export const defaultMjmlSubjectTemplates: Record<MessageEventTypes, string> = {
-  ACCOUNT_CHANGE_EMAIL_CONFIRM: "Your email has been updated",
-  ACCOUNT_CHANGE_EMAIL_REQUEST: "Confirm your new email address",
-  ACCOUNT_CONFIRMATION: "Activate your account",
-  ACCOUNT_DELETE: "Confirm account deletion",
-  ACCOUNT_PASSWORD_RESET: "Reset your password",
-  GIFT_CARD_SENT: "You've received a gift card!",
-  INVOICE_SENT: "Your invoice is ready",
-  ORDER_CANCELLED: "Your order has been cancelled",
-  ORDER_CONFIRMED: "Your order is confirmed!",
-  ORDER_CREATED: "Thanks for your order!",
-  ORDER_FULFILLED: "Your order is on its way!",
-  ORDER_FULFILLMENT_UPDATE: "Shipping update for your order",
-  ORDER_FULLY_PAID: "Payment received – thank you!",
-  ORDER_REFUNDED: "Your refund has been processed",
+  ACCOUNT_CHANGE_EMAIL_CONFIRM: "Your WWSpares email has been updated",
+  ACCOUNT_CHANGE_EMAIL_REQUEST: "Confirm your new WWSpares email",
+  ACCOUNT_CONFIRMATION: "Activate your WWSpares account",
+  ACCOUNT_DELETE: "Confirm WWSpares account deletion",
+  ACCOUNT_PASSWORD_RESET: "Reset your WWSpares password",
+  GIFT_CARD_SENT: "You've received a WWSpares gift card",
+  INVOICE_SENT: "Your invoice for order #{{order.number}}",
+  ORDER_CANCELLED: "Order #{{order.number}} cancelled",
+  ORDER_CONFIRMED: "Order #{{order.number}} confirmed — packing now",
+  ORDER_CREATED: "Order #{{order.number}} received — checking stock",
+  ORDER_FULFILLED: "Order #{{order.number}} shipped — your parts are on the way",
+  ORDER_FULFILLMENT_UPDATE: "Shipping update for order #{{order.number}}",
+  ORDER_FULLY_PAID: "Payment received for order #{{order.number}}",
+  ORDER_REFUNDED: "Refund processed for order #{{order.number}}",
 };
