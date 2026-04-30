@@ -57,7 +57,7 @@ export class SmtpEmailSender implements ISMTPEmailSender {
       case "TLS":
         transporter = nodemailer.createTransport({
           tls: {
-            minVersion: "TLSv1.3",
+            minVersion: "TLSv1.2",
           },
           secure: false,
           host: smtpSettings.host,
@@ -72,7 +72,7 @@ export class SmtpEmailSender implements ISMTPEmailSender {
       case "SSL":
         transporter = nodemailer.createTransport({
           tls: {
-            minVersion: "TLSv1.3",
+            minVersion: "TLSv1.2",
           },
           secure: true,
           host: smtpSettings.host,
