@@ -300,19 +300,30 @@ ${mjHead}
         {{#each order.fulfillments}}
           {{#if trackingNumber}}
           <mj-text padding="8px 0 0" color="${colors.text}">
-            <strong>Tracking number:</strong> {{trackingNumber}}
+            <strong>Tracking number:</strong> {{trackingNumber}}{{#if (carrierName trackingNumber)}} ({{carrierName trackingNumber}}){{/if}}
           </mj-text>
           {{/if}}
         {{/each}}
       </mj-column>
     </mj-section>
-    {{#if order.redirectUrl}}
-    <mj-section padding="16px 0 0">
-      <mj-column>
-        <mj-button href="{{order.redirectUrl}}">Track your order</mj-button>
-      </mj-column>
-    </mj-section>
-    {{/if}}
+    {{#with (lookup order.fulfillments 0)}}
+      {{#if (carrierTrackingUrl trackingNumber)}}
+      <mj-section padding="16px 0 0">
+        <mj-column>
+          <mj-button href="{{carrierTrackingUrl trackingNumber}}">Track with {{carrierName trackingNumber}}</mj-button>
+        </mj-column>
+      </mj-section>
+      {{/if}}
+    {{/with}}
+    {{#unless (lookup (lookup order.fulfillments 0) "trackingNumber")}}
+      {{#if order.redirectUrl}}
+      <mj-section padding="16px 0 0">
+        <mj-column>
+          <mj-button href="{{order.redirectUrl}}">View your order</mj-button>
+        </mj-column>
+      </mj-section>
+      {{/if}}
+    {{/unless}}
     ${orderNumberBadge}
     <mj-section padding="16px 0"><mj-column><mj-divider border-color="${colors.border}" border-width="1px" padding="0" /></mj-column></mj-section>
     ${orderLinesWithImages}
@@ -398,11 +409,18 @@ ${mjHead}
         <mj-text padding="0 0 8px">There's an update on your shipment for order #{{order.number}}.</mj-text>
         {{#if fulfillment.tracking_number}}
         <mj-text padding="8px 0 0">
-          <strong>Tracking number:</strong> {{fulfillment.tracking_number}}
+          <strong>Tracking number:</strong> {{fulfillment.tracking_number}}{{#if (carrierName fulfillment.tracking_number)}} ({{carrierName fulfillment.tracking_number}}){{/if}}
         </mj-text>
         {{/if}}
       </mj-column>
     </mj-section>
+    {{#if (carrierTrackingUrl fulfillment.tracking_number)}}
+    <mj-section padding="16px 0 0">
+      <mj-column>
+        <mj-button href="{{carrierTrackingUrl fulfillment.tracking_number}}">Track with {{carrierName fulfillment.tracking_number}}</mj-button>
+      </mj-column>
+    </mj-section>
+    {{/if}}
     ${shippingAddressBlockNotify}
     ${footerSection}
   </mj-wrapper>

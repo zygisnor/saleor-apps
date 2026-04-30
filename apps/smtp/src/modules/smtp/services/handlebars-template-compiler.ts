@@ -5,6 +5,7 @@ import { err, ok, type Result } from "neverthrow";
 
 import { BaseError } from "../../../errors";
 import { createLogger } from "../../../logger";
+import { registerCarrierHelpers } from "./carrier-helpers";
 import { type TemplateErrorCode, templateErrorCodes } from "./template-error-codes";
 
 const logger = createLogger("compileHandlebarsTemplate");
@@ -20,6 +21,7 @@ export interface ITemplateCompiler {
 }
 
 registerAllowedHelpers(Handlebars, handlebarsHelpers);
+registerCarrierHelpers(Handlebars);
 
 const resolveHandlebarsErrorCode = (message: string): TemplateErrorCode => {
   if (message.includes("Missing helper")) {
