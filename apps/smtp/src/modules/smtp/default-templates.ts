@@ -1,8 +1,9 @@
 import { type MessageEventTypes } from "../event-handlers/message-event-types";
 
-// ---- Design system ----
-// Industrial automotive palette: deep blue + amber accent.
-// Slate neutrals carried over for body text + dividers.
+/*
+ * Design system — industrial automotive palette: deep blue + amber accent.
+ * Slate neutrals carried over for body text and dividers.
+ */
 const colors = {
   primary: "#0b3a6f", // Deep trade blue — headings, primary buttons
   accent: "#ea580c", // Amber — accent strip + secondary highlights
