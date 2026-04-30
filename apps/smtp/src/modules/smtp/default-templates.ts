@@ -17,6 +17,7 @@ const colors = {
 };
 
 const SUPPORT_EMAIL = "info@wwspares.com";
+const LOGO_URL = "https://media.wwspares.com/logos/Brand-assets/logo-lockup-light.svg";
 
 // ---- Shared MJML head ----
 const mjHead = `<mj-head>
@@ -50,29 +51,17 @@ const accentBar = `<mj-section padding="0" background-color="${colors.surface}">
   </mj-column>
 </mj-section>`;
 
-// ---- Header for Notify-payload templates (snake_case: site_name / logo_url) ----
+// ---- Header for Notify-payload templates (account / fulfillment update) ----
 const headerSection = `<mj-section padding="24px 24px 16px">
   <mj-column>
-    {{#if logo_url}}
-    <mj-image src="{{logo_url}}" alt="{{site_name}}" width="120px" align="left" padding="0" />
-    {{else}}
-    <mj-text font-size="22px" font-weight="700" color="${colors.primary}" padding="0">
-      {{#if site_name}}{{site_name}}{{else}}WWSpares{{/if}}
-    </mj-text>
-    {{/if}}
+    <mj-image src="${LOGO_URL}" alt="WWSpares" width="180px" align="left" padding="0" />
   </mj-column>
 </mj-section>`;
 
-// ---- Header for Order-webhook templates (uses branding from app config) ----
+// ---- Header for Order-webhook templates ----
 const orderHeaderSection = `<mj-section padding="24px 24px 16px">
   <mj-column>
-    {{#if branding.logoUrl}}
-    <mj-image src="{{branding.logoUrl}}" alt="{{branding.siteName}}" width="120px" align="left" padding="0" />
-    {{else}}
-    <mj-text font-size="22px" font-weight="700" color="${colors.primary}" padding="0">
-      {{#if branding.siteName}}{{branding.siteName}}{{else}}{{#if order.channel.name}}{{order.channel.name}}{{else}}WWSpares{{/if}}{{/if}}
-    </mj-text>
-    {{/if}}
+    <mj-image src="${LOGO_URL}" alt="WWSpares" width="180px" align="left" padding="0" />
   </mj-column>
 </mj-section>`;
 
