@@ -10,6 +10,7 @@ type Carrier = {
 const detectCarrier = (raw: unknown): Carrier | null => {
   if (typeof raw !== "string") return null;
   const tn = raw.trim().toUpperCase();
+
   if (!tn) return null;
 
   if (/^(JJD|JVGL)/.test(tn)) {
@@ -42,17 +43,20 @@ const detectCarrier = (raw: unknown): Carrier | null => {
       url: (t) => `https://www.dhl.com/en/express/tracking.html?AWB=${enc(t)}`,
     };
   }
+
   return null;
 };
 
 export const registerCarrierHelpers = (handlebars: typeof Handlebars): void => {
   handlebars.registerHelper("carrierTrackingUrl", function (trackingNumber: unknown) {
     const carrier = detectCarrier(trackingNumber);
+
     return carrier ? carrier.url(String(trackingNumber).trim()) : "";
   });
 
   handlebars.registerHelper("carrierName", function (trackingNumber: unknown) {
     const carrier = detectCarrier(trackingNumber);
+
     return carrier ? carrier.name : "";
   });
 };
