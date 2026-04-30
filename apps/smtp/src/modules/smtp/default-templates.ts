@@ -17,7 +17,7 @@ const colors = {
 };
 
 const SUPPORT_EMAIL = "info@wwspares.com";
-const LOGO_URL = "https://media.wwspares.com/logos/Brand-assets/logo-lockup-light.svg";
+const LOGO_URL = "https://media.wwspares.com/logos/Brand-assets/logo-lockup-dark.svg";
 
 // ---- Shared MJML head ----
 const mjHead = `<mj-head>
