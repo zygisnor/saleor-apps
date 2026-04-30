@@ -333,32 +333,27 @@ ${mjHead}
         <mj-text padding="0" color="${colors.muted}">Shipped via {{order.shippingMethodName}}</mj-text>
         {{/if}}
         {{#each order.fulfillments}}
-          {{#if trackingNumber}}
-          <mj-text padding="8px 0 0" color="${colors.text}">
-            <strong>Tracking number:</strong> {{trackingNumber}}{{#if (carrierName trackingNumber)}} ({{carrierName trackingNumber}}){{/if}}
-          </mj-text>
-          {{/if}}
+          {{#unless (eq status "CANCELED")}}
+            {{#if trackingNumber}}
+            <mj-text padding="8px 0 0" color="${colors.text}">
+              <strong>Tracking number:</strong> {{trackingNumber}}{{#if (carrierName trackingNumber)}} ({{carrierName trackingNumber}}){{/if}}
+            </mj-text>
+            {{/if}}
+          {{/unless}}
         {{/each}}
       </mj-column>
     </mj-section>
-    {{#with (lookup order.fulfillments 0)}}
-      {{#if (carrierTrackingUrl trackingNumber)}}
-      <mj-section padding="16px 24px 0">
-        <mj-column>
-          <mj-button href="{{carrierTrackingUrl trackingNumber}}">Track with {{carrierName trackingNumber}}</mj-button>
-        </mj-column>
-      </mj-section>
-      {{/if}}
-    {{/with}}
-    {{#unless (lookup (lookup order.fulfillments 0) "trackingNumber")}}
-      {{#if order.redirectUrl}}
-      <mj-section padding="16px 24px 0">
-        <mj-column>
-          <mj-button href="{{order.redirectUrl}}">View your order</mj-button>
-        </mj-column>
-      </mj-section>
-      {{/if}}
-    {{/unless}}
+    {{#each order.fulfillments}}
+      {{#unless (eq status "CANCELED")}}
+        {{#if (carrierTrackingUrl trackingNumber)}}
+        <mj-section padding="16px 24px 0">
+          <mj-column>
+            <mj-button href="{{carrierTrackingUrl trackingNumber}}">Track with {{carrierName trackingNumber}}</mj-button>
+          </mj-column>
+        </mj-section>
+        {{/if}}
+      {{/unless}}
+    {{/each}}
     ${trustStrip}
     ${orderNumberBadge}
     ${sectionDivider}
