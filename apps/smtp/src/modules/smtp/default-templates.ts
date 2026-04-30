@@ -45,11 +45,10 @@ const mjHead = `<mj-head>
 </mj-head>`;
 
 // ---- Top accent bar (brand signature) ----
-const accentBar = `<mj-section padding="0" background-color="${colors.surface}">
-  <mj-column>
-    <mj-raw><div class="accent-bar" style="height:4px;background:${colors.accent};border-radius:10px 10px 0 0;line-height:4px;font-size:0;">&nbsp;</div></mj-raw>
-  </mj-column>
-</mj-section>`;
+// accentBar removed (Gmail thread-trim collapse on identical chrome).
+// Kept as empty token so the template literals stay readable.
+const accentBar = "";
+const trustStrip = "";
 
 // ---- Header for Notify-payload templates (account / fulfillment update) ----
 const headerSection = `<mj-section padding="24px 24px 16px">
@@ -65,71 +64,30 @@ const orderHeaderSection = `<mj-section padding="24px 24px 16px">
   </mj-column>
 </mj-section>`;
 
-// ---- Trust strip (only for transactional order emails) ----
-const trustStrip = `<mj-section padding="0 24px 16px">
+/*
+ * Trust strip and accent bar removed: Gmail's thread view collapses content
+ * that's identical between consecutive emails in the same conversation
+ * (created → confirmed → shipped). Decorative chrome that repeated on every
+ * email was the trigger.
+ */
+
+// ---- Footer for Order-webhook templates (single line) ----
+const orderFooterSection = `<mj-section padding="24px 24px 24px">
   <mj-column>
-    <mj-text font-size="12px" font-weight="600" color="${colors.muted}" letter-spacing="1px" align="left" padding="0">
-      12-MONTH WARRANTY &nbsp;·&nbsp; EU-WIDE SHIPPING &nbsp;·&nbsp; GENUINE OEM
+    <mj-divider border-color="${colors.border}" border-width="1px" padding="0 0 16px" />
+    <mj-text font-size="13px" color="${colors.muted}" align="center" padding="0">
+      Questions about this order? Reply to this email or write to <a href="mailto:${SUPPORT_EMAIL}" style="color:${colors.primary};text-decoration:none;"><strong>${SUPPORT_EMAIL}</strong></a>.
     </mj-text>
   </mj-column>
 </mj-section>`;
 
-// ---- Footer for Order-webhook templates ----
-const orderFooterSection = `<mj-section padding="24px 24px 0">
+// ---- Footer for Notify-payload templates (single line) ----
+const footerSection = `<mj-section padding="24px 24px 24px">
   <mj-column>
-    <mj-divider border-color="${colors.border}" border-width="1px" padding="0 0 20px" />
-    <mj-text font-size="14px" color="${colors.text}" align="center" padding="0 0 8px">
-      <strong>Need help with this order?</strong>
+    <mj-divider border-color="${colors.border}" border-width="1px" padding="0 0 16px" />
+    <mj-text font-size="13px" color="${colors.muted}" align="center" padding="0">
+      Questions? Write to <a href="mailto:${SUPPORT_EMAIL}" style="color:${colors.primary};text-decoration:none;"><strong>${SUPPORT_EMAIL}</strong></a>.
     </mj-text>
-    <mj-text font-size="14px" color="${colors.muted}" align="center" padding="0 0 4px">
-      Reply to this email or write to <a href="mailto:${SUPPORT_EMAIL}" style="color:${colors.primary};text-decoration:none;"><strong>${SUPPORT_EMAIL}</strong></a>.
-    </mj-text>
-    <mj-text font-size="13px" color="${colors.muted}" align="center" padding="0 0 16px">
-      Quote your order number when contacting us — we'll get back to you within one business day.
-    </mj-text>
-  </mj-column>
-</mj-section>
-<mj-section padding="0 24px 24px">
-  <mj-column>
-    <mj-text font-size="12px" color="${colors.muted}" align="center" padding="0">
-      WWSpares &mdash; used genuine OEM auto parts &mdash; VW, Audi, BMW, Mercedes, Porsche &amp; more
-    </mj-text>
-    {{#if branding.siteName}}
-    <mj-text font-size="12px" color="${colors.muted}" align="center" padding-top="4px">
-      &copy; {{branding.siteName}}
-    </mj-text>
-    {{else}}
-    {{#if order.channel.name}}
-    <mj-text font-size="12px" color="${colors.muted}" align="center" padding-top="4px">
-      &copy; {{order.channel.name}}
-    </mj-text>
-    {{/if}}
-    {{/if}}
-  </mj-column>
-</mj-section>`;
-
-// ---- Footer for Notify-payload templates (account / fulfillment-update) ----
-const footerSection = `<mj-section padding="24px 24px 0">
-  <mj-column>
-    <mj-divider border-color="${colors.border}" border-width="1px" padding="0 0 20px" />
-    <mj-text font-size="14px" color="${colors.text}" align="center" padding="0 0 8px">
-      <strong>Questions?</strong>
-    </mj-text>
-    <mj-text font-size="14px" color="${colors.muted}" align="center" padding="0 0 16px">
-      Write to <a href="mailto:${SUPPORT_EMAIL}" style="color:${colors.primary};text-decoration:none;"><strong>${SUPPORT_EMAIL}</strong></a> &mdash; we'll respond within one business day.
-    </mj-text>
-  </mj-column>
-</mj-section>
-<mj-section padding="0 24px 24px">
-  <mj-column>
-    <mj-text font-size="12px" color="${colors.muted}" align="center" padding="0">
-      WWSpares &mdash; used genuine OEM auto parts
-    </mj-text>
-    {{#if site_name}}
-    <mj-text font-size="12px" color="${colors.muted}" align="center" padding-top="4px">
-      &copy; {{site_name}}
-    </mj-text>
-    {{/if}}
   </mj-column>
 </mj-section>`;
 
