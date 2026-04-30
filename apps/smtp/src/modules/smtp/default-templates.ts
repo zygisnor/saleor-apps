@@ -356,8 +356,29 @@ ${mjHead}
     <mj-section padding="0 24px 8px">
       <mj-column>
         <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Order cancelled</mj-text>
-        <mj-text padding="0 0 8px">This order has been cancelled. If a payment had been taken, the refund is on its way back to your card.</mj-text>
-        <mj-text padding="0" color="${colors.muted}">Didn't request this? Reply to this email and we'll sort it out straight away.</mj-text>
+        <mj-text padding="0 0 12px">We're sorry &mdash; this order has been cancelled. The most common reasons:</mj-text>
+        <mj-text padding="0 0 8px" color="${colors.text}">
+          &bull;&nbsp; A part is no longer in stock or is on backorder beyond our usual lead time<br />
+          &bull;&nbsp; A condition or fitment issue was spotted during pre-shipment inspection<br />
+          &bull;&nbsp; A delivery or address problem we couldn't resolve in time
+        </mj-text>
+        <mj-text padding="8px 0 0" color="${colors.muted}">If you'd like the specific reason for this cancellation, just reply to this email and we'll explain.</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section padding="20px 24px 0">
+      <mj-column background-color="${colors.panel}" border-radius="8px" padding="20px">
+        <mj-text font-size="14px" font-weight="700" color="${colors.primary}" padding="0 0 8px">About your refund</mj-text>
+        <mj-text font-size="14px" color="${colors.text}" padding="0 0 8px">
+          <strong>If your card was charged:</strong> we've issued a full refund to your original payment method automatically. Most banks post it within <strong>4 working days</strong>; some can take up to 10. You don't need to contact us to request it &mdash; it's already on its way.
+        </mj-text>
+        <mj-text font-size="14px" color="${colors.text}" padding="0">
+          <strong>If your payment was only authorised (not yet charged):</strong> the authorisation has been released. The hold on your funds typically clears within a couple of working days, depending on your bank. No money was actually taken.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section padding="16px 24px 0">
+      <mj-column>
+        <mj-text font-size="13px" color="${colors.muted}">Still don't see the refund after that window? Reply to this email with your bank's name and the last 4 digits of the card and we'll trace it for you.</mj-text>
       </mj-column>
     </mj-section>
     ${orderNumberBadge}
@@ -378,8 +399,8 @@ ${mjHead}
     <mj-section padding="0 24px 8px">
       <mj-column>
         <mj-text font-size="24px" font-weight="700" color="${colors.primary}" padding="0 0 12px">Refund processed</mj-text>
-        <mj-text padding="0 0 8px">Your refund has been processed and the funds are returning to your original payment method.</mj-text>
-        <mj-text padding="0" color="${colors.muted}">Most cards show the refund within 5&ndash;10 business days. SEPA / bank transfers can take a little longer.</mj-text>
+        <mj-text padding="0 0 8px">Your refund has been issued back to the original payment method. We don't hold the funds &mdash; from now on the timing is up to your bank.</mj-text>
+        <mj-text padding="0" color="${colors.muted}">Most banks post it within <strong>4 working days</strong>; some take up to 10. SEPA / bank transfers can take a little longer.</mj-text>
       </mj-column>
     </mj-section>
     ${orderNumberBadge}
