@@ -22,7 +22,7 @@ const detectCarrier = (raw: unknown): Carrier | null => {
   if (/^[A-Z]{2}\d{9}LT$/.test(tn)) {
     return {
       name: "LP Express",
-      url: (t) => `https://www.lpexpress.lt/lt/siuntu-paieska/?trackid=${enc(t)}`,
+      url: (t) => `https://lpexpress.lt/track?parcel=${enc(t)}`,
     };
   }
   if (/^\d{14}$/.test(tn)) {
